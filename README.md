@@ -16,7 +16,6 @@ Desenvolvimento de um **Master Agent** utilizando **n8n e LangChain**, capaz de 
   * Extrai dados de documentos PDF.
 * **Integração CRM:** Cadastro e consulta automática de leads no banco de dados.
 
-![Arquitetura do Agente IA](workflow-agente.png)
 
 ## 🚀 Impacto
 * **Experiência Humanizada:** O cliente conversa naturalmente, enviando áudios ou fotos, e a IA responde em formato humanizado e fracionado, respeitando os limites de caracteres do WhatsApp.
