@@ -1,0 +1,1062 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "MasterAgent",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [-1200, 1088],
+      "id": "c5b9511e-00f9-4d64-8390-03f6d87adfcd",
+      "name": "Gatilho",
+      "webhookId": "YOUR_WEBHOOK_ID",
+      "notes": "TEMPLATE DESENVOLVIDO POR CARLOS BRATZ\nlinkedin.com/in/carlosjosebratz"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {"caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 2},
+          "conditions": [
+            {
+              "id": "c667b354-f7e3-4a99-bce8-17f4dee0d49f",
+              "leftValue": "={{ $('Gatilho').item.json.body.data.key.fromMe }}",
+              "rightValue": "",
+              "operator": {"type": "boolean", "operation": "false", "singleValue": true}
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [-736, 1088],
+      "id": "3eb64b23-75a7-4ad3-9456-f5c769673494",
+      "name": "Filtro de Bloqueio",
+      "notes": "TEMPLATE DESENVOLVIDO POR CARLOS BRATZ\nlinkedin.com/in/carlosjosebratz"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {"id": "20eb4e1b-36d3-41d1-b43f-f50b4e89342c", "name": "Nome", "value": "={{ $('Gatilho').item.json.body.data.pushName }}", "type": "string"},
+            {"id": "b6a992e5-7515-4eef-8e82-3f984c7845d7", "name": "Telefone", "value": "={{ $('Gatilho').item.json.body.data.key.remoteJid.match(/\\d+(?=@)/)[0] }}", "type": "string"}
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [-448, 1088],
+      "id": "71b2ae67-aded-434a-9430-635f55b02243",
+      "name": "Dados Lead",
+      "notes": "TEMPLATE DESENVOLVIDO POR CARLOS BRATZ\nlinkedin.com/in/carlosjosebratz"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "tableId": "Master agente",
+        "filters": {
+          "conditions": [
+            {"keyName": "telefone", "keyValue": "={{ $('Gatilho').item.json.body.data.key.remoteJid.replace(/\\D/g, '') }}"}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [2832, 1072],
+      "id": "36010ebe-82b7-41ae-bbc8-f3e58306709c",
+      "name": "Encontrar Cliente",
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {"id": "YOUR_SUPABASE_CREDENTIAL_ID", "name": "Supabase account"}
+      },
+      "notes": "TEMPLATE DESENVOLVIDO POR CARLOS BRATZ\nlinkedin.com/in/carlosjosebratz"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {"caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 2},
+          "conditions": [
+            {
+              "id": "9d546d7c-fc7f-4ce0-a443-34475e3cc41f",
+              "leftValue": "={{ $json.id }}",
+              "rightValue": "",
+              "operator": {"type": "number", "operation": "exists", "singleValue": true}
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [3056, 1072],
+      "id": "dc01e79d-984d-4b1c-81ab-cd913e33e261",
+      "name": "Cliente existe?",
+      "notes": "TEMPLATE DESENVOLVIDO POR CARLOS BRATZ\nlinkedin.com/in/carlosjosebratz"
+    },
+    {
+      "parameters": {
+        "tableId": "Master agente",
+        "fieldsUi": {
+          "fieldValues": [
+            {"fieldId": "nome", "fieldValue": "={{ $('Dados Lead').item.json.Nome }}"},
+            {"fieldId": "telefone", "fieldValue": "={{ $('Dados Lead').item.json.Telefone }}"}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [3280, 1200],
+      "id": "2e2ffa8f-a37c-4581-a80d-e3211fd842e2",
+      "name": "Criar Cliente",
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {"id": "YOUR_SUPABASE_CREDENTIAL_ID", "name": "Supabase account"}
+      },
+      "notes": "TEMPLATE DESENVOLVIDO POR CARLOS BRATZ\nlinkedin.com/in/carlosjosebratz"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [3488, 1072],
+      "id": "1d98cde9-77f7-41f5-a918-245470459464",
+      "name": "Merge",
+      "notes": "TEMPLATE DESENVOLVIDO POR CARLOS BRATZ\nlinkedin.com/in/carlosjosebratz"
+    },
+    {
+      "parameters": {
+        "model": {"__rl": true, "mode": "list", "value": "gpt-4.1-mini"},
+        "options": {"temperature": "={{ $('Parametros do Fluxo').item.json.ModeloTemperatura }}"}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [3728, 1248],
+      "id": "350562a6-c5eb-4b6a-a299-521f1d9fd43f",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {"id": "YOUR_OPENAI_CREDENTIAL_ID", "name": "openai_account"}
+      },
+      "notes": "TEMPLATE DESENVOLVIDO POR CARLOS BRATZ\nlinkedin.com/in/carlosjosebratz"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Mensagem').item.json.mensagens }}",
+        "options": {
+          "systemMessage": "=# Variáveis\nData Atual: {{ $now.weekdayLong }}, Semana {{ $now.format('WW') }}, {{ $now.format('DD/MM/yyyy') }}, {{ ((($now.hour) % 24).toString()).padStart(2, '0') }}:{{ $now.minute.toString().padStart(2, '0') }}\n\n<ContextoImagem>\nDados entre os parâmetros <ContextoImagem></ContextoImagem> são imagens enviadas pelo usuário que foram pré processadas e detalhadas por uma IA  para que você as entenda.\n\n<ContextoPDF>\nDados entre os parâmetros <ContextoPDF></ContextoPDF> são arquivos PDF enviados pelo usuário que foram pré processadas e transcritos por uma IA  para que você as entenda.\n\n<ErroFormatoMensagem>\nO usuário enviou um formato de mensagem que não podemos processar. \nCaso seja a única mensagem enviada, diga ao usuário que você não entende esse tipo de mensagem, você entende mensagens de texto, áudio, imagem e pdf.\n\n## Instruções do Sistema\n\n\n\nPrompt — Sofia / Seikode Digital (Disparo para Clínicas)\n⚠️ CONTEXTO CRÍTICO — LEIA ANTES DE TUDO\nEsta conversa NÃO começa do zero. Ela é uma continuação do disparo feito pelo Carlos, fundador da Seikode, para clínicas de Vitória/ES. A mensagem de abertura que o cliente JÁ recebeu foi:\n\nOi! Aqui é o Carlos, da Seikode 👋\nTô falando com clínicas aqui de Vitória e [Nome da Clínica] a me chamou atenção.\nPergunta rápida: vocês recebem bastante pedido de orçamento no WhatsApp que acaba não virando consulta? Tipo, o paciente pergunta o valor, some e não responde mais?\nIsso é dinheiro saindo sem ninguém perceber — e dá pra resolver com tecnologia. Posso te mostrar como, em 5 minutinhos?\n\nA primeira mensagem que você (Sofia) vai ver é a resposta da clínica a essa mensagem do Carlos. Você é a assistente do Carlos e está dando continuidade à conversa enquanto ele atende outras clínicas.\nVocê NUNCA se apresenta como se fosse o primeiro contato. O cliente já sabe que está falando com a Seikode.\n\n⚠️ REGRA DE OURO DA CONVERSA\nVocê está em um atendimento via WhatsApp. Estas regras têm prioridade sobre qualquer outra instrução:\n\nUMA pergunta por mensagem. Nunca duas, nunca três.\nEnvie UMA mensagem curta por turno (máximo 3 a 4 linhas, idealmente 1 a 2).\nDepois de enviar, PARE e aguarde a resposta do cliente. Não adiante o próximo passo.\nSe você se pegar querendo perguntar duas coisas, escolha a mais importante e guarde a outra para o próximo turno.\nNÃO use conectores de empilhamento (\"além disso...\", \"também queria saber...\", \"outra coisa...\"). Se aparecerem, apague e mande só a primeira pergunta.\nNunca ofereça a reunião na mesma mensagem em que está fazendo uma pergunta de qualificação. A oferta da reunião é sempre um turno isolado.\nTom de WhatsApp: leve, humano, sem formalidade engessada. Pode usar \"tô\", \"pra\", \"né\", emojis pontuais (👋 👍 🙌 ✅) — mas com moderação.\n\n\nIdentidade e Personalidade\n\nNome: Sofia\nFunção: Assistente do Carlos / Consultora de sucesso do cliente na Seikode Digital\nComo se apresentar (quando perguntada): \"Sou a Sofia, trabalho com o Carlos aqui na Seikode. Ele tá em atendimento agora e me pediu pra te dar continuidade enquanto isso 🙌\"\nMissão: Qualificar a clínica e agendar a conversa de 5 minutinhos com o Carlos.\nTom: Consultivo, humano, focado no problema da clínica (paciente que pede orçamento e some). Nada de jargão técnico pesado.\nIdioma: Português brasileiro.\n\n\nA Dor que Você Está Resolvendo (foco do disparo)\nCenário típico da clínica de Vitória:\n\nPaciente chama no WhatsApp pedindo valor de consulta/procedimento.\nA recepção responde quando consegue (às vezes minutos, às vezes horas depois).\nQuando responde, o paciente já esfriou ou já marcou em outro lugar.\nO orçamento \"some\" e ninguém faz follow-up.\nA clínica perde dinheiro todo dia sem perceber.\n\nA solução da Seikode (linguagem simples, sem jargão):\n\nUm atendente automático no WhatsApp que responde na hora — 24/7 — com cordialidade humana, qualifica o paciente, tira dúvidas básicas (valores, convênios, horários) e já oferece agendamento.\nQuando o paciente esfria sem responder, o sistema faz follow-up automático (\"Oi, vi que você se interessou pela consulta de [X], ainda quer marcar?\").\nTudo conectado à agenda da clínica e ao histórico do paciente.\nPor trás disso: automação com n8n + landing page de conversão (se a clínica rodar anúncios).\n\nComo falar disso sem ser técnica:\n\n✅ \"Um atendente automático que conversa no WhatsApp como se fosse uma recepcionista.\"\n✅ \"A gente automatiza o follow-up pra ninguém mais sumir do radar.\"\n❌ \"Webhooks integrados via API REST com fluxos no n8n.\"\n\n\nConhecimento Base\nSobre a Empresa\n\nNome: Seikode Digital\nSetor: Tecnologia — automação e presença digital, foco em clínicas e prestadores de serviço.\nSite: https://seikode-digital.vercel.app/\nEndereço: Rua João da Cruz, 25, nº 401 — Praia do Canto, Vitória/ES.\nHorário: Seg a sex, 08h às 19h. Sáb, 08h às 13h. Não atende domingos e feriados.\n\nServiços (em linguagem de clínica)\n1. Atendente automático no WhatsApp (automação com n8n)\n\nResponde na hora, qualifica o paciente, tira dúvidas, agenda consulta.\nFaz follow-up automático com quem some.\nConecta com agenda, planilhas, CRM, prontuário (quando aplicável).\n\n2. Landing Page para captação\n\nPágina focada em conversão pra clínicas que rodam anúncios no Instagram/Google.\nPixel configurado pra rastrear o que vira consulta de verdade.\nJá entrega o lead direto no WhatsApp automatizado.\n\n3. O Combo\n\nAnúncio → Landing Page → WhatsApp automatizado → Agenda da clínica.\nFunil completo. A clínica não precisa contratar 3 profissionais diferentes.\n\nDiferenciais\n\nEcossistema completo (vitrine + motor por trás).\nIndependência tecnológica: n8n próprio, sem ficar refém de plataformas caras.\nEstratégia antes do código: a gente entende o processo da clínica antes de automatizar.\n\nInvestimento\n\nReunião de diagnóstico: gratuita e sem compromisso.\nNunca informe valor fechado. Tudo é personalizado e definido na reunião.\nSe o cliente insistir muito por uma faixa: \"Os projetos costumam ficar entre R$ 200 e R$ 2.000 dependendo do escopo, mas o valor exato sai depois que o Carlos entender o que faz sentido pra sua clínica.\"\nPagamento: PIX, débito, crédito em até 12x sem juros.\n\n\nFluxo de Conversa (um passo por mensagem)\nA conversa sempre começa com a resposta da clínica ao disparo do Carlos. Identifique em qual cenário ela se encaixa e siga o fluxo correspondente.\n\nCENÁRIO A — Cliente engaja com a dor (\"Sim, acontece muito\", \"É verdade\", \"Nossa, é exatamente isso\")\nTurno 1 (você): Valide a dor + faça UMA pergunta de qualificação.\nExemplo: \"Pois é, [nome da clínica/pessoa] — esse é o cenário mais comum que a gente vê 😅 Pra eu te ajudar melhor: vocês usam algum sistema pra agenda hoje, ou é tudo no WhatsApp e caderninho mesmo?\"\nTurno 2: Pergunte sobre o volume.\nExemplo: \"Entendi! E mais ou menos quantos pacientes chamam por semana pedindo orçamento ou agendamento?\"\nTurno 3: Pergunte se rodam anúncios.\nExemplo: \"Vocês rodam anúncio no Instagram/Google ou os pacientes chegam mais por indicação mesmo?\"\nTurno 4 — oferta da reunião (turno isolado):\n\"Show, [nome], já tenho um quadro do cenário aqui. Posso encaixar você com o Carlos pra aquela conversa de 5 minutinhos? Ele te mostra exatamente como resolveria isso na prática. É de boa, sem compromisso.\"\nTurno 5 (após \"sim\"): Pergunte o melhor dia/horário. UM dado por mensagem.\n\nCENÁRIO B — Cliente curioso mas não confirma a dor (\"O que é isso?\", \"Como funciona?\", \"Me explica melhor\")\nTurno 1: Explique em 2-3 linhas, sem jargão, e devolva uma pergunta.\nExemplo: \"Claro! A gente coloca um atendente automático no WhatsApp que responde na hora, tira dúvida do paciente, manda valores e já oferece agendamento — tudo soando como uma recepcionista de verdade. Me conta uma coisa: hoje quem responde o WhatsApp da clínica?\"\nTurno 2 em diante: Continue qualificando uma pergunta por vez (volume, agenda, anúncios) até chegar na oferta da reunião.\n\nCENÁRIO C — Cliente desconfiado (\"Quem é você?\", \"Como conseguiu meu número?\", \"Não conheço essa empresa\")\nTurno 1: Acolha + transparência rápida.\nExemplo: \"Boa pergunta, [nome]! Sou a Sofia, trabalho com o Carlos aqui na Seikode 🙌 A gente tá fazendo um mapeamento de clínicas aqui de Vitória — seu contato veio do [adapte: Google/Instagram/indicação, conforme o caso real]. Sem nenhum compromisso, viu? Posso te explicar rapidinho o que a gente faz?\"\nTurno 2 (se ele topar): Explica em 2-3 linhas e qualifica.\n\nCENÁRIO D — \"Manda por aqui mesmo\" / \"Não tenho tempo pra reunião\"\nTurno 1: Respeite + reposicione.\nExemplo: \"Tranquilo! Posso te mandar um resumo bem rápido por aqui então 👍 Antes, só uma pergunta pra eu te mandar a coisa certa: o que mais te incomoda hoje — o paciente que some depois do orçamento, ou a recepção que não dá conta de responder rápido?\"\nTurno 2: Continue a qualificação por mensagem mesmo. Depois de 2-3 trocas, ofereça novamente os 5 minutinhos com o Carlos como \"papo rápido por áudio ou Meet, do jeito que for melhor\".\n\nCENÁRIO E — \"Quanto custa?\" logo de cara\nTurno 1: Não dê valor. Reposicione pra reunião.\nExemplo: \"Ótima pergunta, [nome]! O valor depende muito do tamanho da clínica e do que faz sentido automatizar — por isso o Carlos faz uma conversa rápida de 5 minutinhos pra entender e te passar o número certo. Posso encaixar vocês ainda essa semana?\"\n\nCENÁRIO F — \"Não tenho esse problema\" / \"Já temos sistema\"\nTurno 1: Acolha sem insistir + faça UMA pergunta exploratória.\nExemplo: \"Que ótimo, [nome]! 🙌 Só por curiosidade: o sistema de vocês também faz follow-up automático com paciente que pede orçamento e some? Essa parte costuma ser o ponto cego mesmo de quem já tem agenda digital.\"\nTurno 2: Se ele engajar, siga pra qualificação. Se realmente não tem interesse, encerre cordialmente: \"Tranquilo! Se um dia mudar de ideia, é só me chamar aqui 👍 Sucesso aí na clínica!\"\n\nAgendamento da Reunião com o Carlos\nQuando for agendar, colete um dado por mensagem:\n\nNome completo do responsável\nNome da clínica (se ainda não souber)\nMelhor dia e turno (manhã/tarde)\nConfirmar o WhatsApp pra envio do link\n\nDepois confirme tudo numa mensagem só:\n\"Perfeito! Vou alinhar com o Carlos e te confirmo aqui pelo WhatsApp com o link do Meet, combinado? 🙌\"\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [3808, 1072],
+      "id": "6bcc6189-c774-487c-97d5-2346bb1da8a8",
+      "name": "Agente IA",
+      "notes": "TEMPLATE DESENVOLVIDO POR CARLOS BRATZ\nlinkedin.com/in/carlosjosebratz"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolCalculator",
+      "typeVersion": 1,
+      "position": [4032, 1248],
+      "id": "f18bbeb0-da55-42c6-b6d9-f61543e4b041",
+      "name": "Calculadora",
+      "notes": "TEMPLATE DESENVOLVIDO POR CARLOS BRATZ\nlinkedin.com/in/carlosjosebratz"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [5200, 976],
+      "id": "aaa058ca-2150-4b92-85b0-c8db650370b6",
+      "name": "Fim",
+      "notes": "TEMPLATE DESENVOLVIDO POR CARLOS BRATZ\nlinkedin.com/in/carlosjosebratz"
+    },
+    {
+      "parameters": {"content": "## Gatilho\nChat Trigger, WhatsApp, Instagram, Telegram, Messenger, etc..", "height": 440, "width": 180, "color": 5},
+      "type": "n8n-nodes-base.stickyNote", "typeVersion": 1, "position": [-1232, 880],
+      "id": "03fe524a-4af6-468a-80fd-ac17995e0998", "name": "Sticky Note2"
+    },
+    {
+      "parameters": {"content": "## Filtros Iniciais\nPara evitar que fluxo seja executado quando não queremos", "height": 440, "color": 5},
+      "type": "n8n-nodes-base.stickyNote", "typeVersion": 1, "position": [-768, 880],
+      "id": "c8e6f0cf-aa1d-439c-97bc-d9faa838baa5", "name": "Sticky Note4"
+    },
+    {
+      "parameters": {"content": "## Dados do Lead\nInformações principais sobre o lead", "height": 440, "width": 260, "color": 5},
+      "type": "n8n-nodes-base.stickyNote", "typeVersion": 1, "position": [-512, 880],
+      "id": "1e5ea8f9-72f3-495d-a021-c0169aeb7a0a", "name": "Sticky Note5"
+    },
+    {
+      "parameters": {"content": "## Registro do Lead no banco de dados (Supabase)\nFluxo para adição do lead no banco de dados postgrees supabase.", "height": 500, "width": 840, "color": 5},
+      "type": "n8n-nodes-base.stickyNote", "typeVersion": 1, "position": [2800, 848],
+      "id": "5bf39840-81a6-4716-bfed-b9a9e0a1b1b2", "name": "Sticky Note7"
+    },
+    {
+      "parameters": {"content": "## Mensagem para o Agente\nMensagem final do usuário para o agente", "height": 500, "width": 260, "color": 5},
+      "type": "n8n-nodes-base.stickyNote", "typeVersion": 1, "position": [2512, 848],
+      "id": "645d7bfa-510e-4aa9-838a-d6addd11a1ff", "name": "Sticky Note10"
+    },
+    {
+      "parameters": {"content": "## Agente de IA\nAgente inteligente com memória e prompt pré formatado", "height": 540, "width": 660, "color": 5},
+      "type": "n8n-nodes-base.stickyNote", "typeVersion": 1, "position": [3648, 848],
+      "id": "36d1e93f-ac47-4ae9-9f26-fdef9db541ae", "name": "Sticky Note11"
+    },
+    {
+      "parameters": {"content": "Ajuste o Node Set com os campos relevantes fornecidos.\n", "height": 280, "width": 210, "color": 4},
+      "type": "n8n-nodes-base.stickyNote", "typeVersion": 1, "position": [-496, 1008],
+      "id": "2b343955-d4ce-4f4c-ac2a-ad98dbef1a04", "name": "Sticky Note"
+    },
+    {
+      "parameters": {"content": "Ajustes os filtros necessários conforme seu gatilho de entrada", "height": 280, "width": 190, "color": 4},
+      "type": "n8n-nodes-base.stickyNote", "typeVersion": 1, "position": [-768, 1008],
+      "id": "5dcd5d0a-4d00-4e06-b7cb-091317db5fb0", "name": "Sticky Note1"
+    },
+    {
+      "parameters": {"content": "Faça os ajustes necessários no Prompt do seu agente", "height": 220, "width": 350, "color": 3},
+      "type": "n8n-nodes-base.stickyNote", "typeVersion": 1, "position": [3776, 992],
+      "id": "0b01d763-913d-4edf-8b6a-c439302e1ac6", "name": "Sticky Note21"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Dados Lead').item.json.Telefone }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.3,
+      "position": [3888, 1248],
+      "id": "be195f87-e53e-42bb-b063-0b2a16d09c86",
+      "name": "Postgres Chat Memory",
+      "credentials": {
+        "postgres": {"id": "YOUR_POSTGRES_CREDENTIAL_ID", "name": "postgres_account"}
+      },
+      "notes": "TEMPLATE DESENVOLVIDO POR CARLOS BRATZ\nlinkedin.com/in/carlosjosebratz"
+    },
+    {
+      "parameters": {"amount": "={{ $('Parametros do Fluxo').item.json.EsperaBuffer }}"},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [1856, 1200],
+      "id": "3a9cfee2-00e4-4c62-bef9-9d03162753f4",
+      "name": "Wait",
+      "webhookId": "YOUR_WAIT_WEBHOOK_ID_1",
+      "notes": "TEMPLATE DESENVOLVIDO POR CARLOS BRATZ\nlinkedin.com/in/carlosjosebratz"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "propertyName": "mensagens",
+        "key": "={{ $('Dados Lead').item.json.Telefone }}_buffer",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [1696, 1200],
+      "id": "1f453c13-62dd-41c6-9a4e-066d1ddc620e",
+      "name": "Redis Buffer1",
+      "credentials": {"redis": {"id": "YOUR_REDIS_CREDENTIAL_ID", "name": "redis_account"}},
+      "notes": "TEMPLATE DESENVOLVIDO POR CARLOS BRATZ\nlinkedin.com/in/carlosjosebratz"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "propertyName": "mensagens",
+        "key": "={{ $('Dados Lead').item.json.Telefone }}_buffer",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [2016, 1200],
+      "id": "b8ed9d62-4af9-486c-9722-ecf216e5f25f",
+      "name": "Redis Buffer2",
+      "credentials": {"redis": {"id": "YOUR_REDIS_CREDENTIAL_ID", "name": "redis_account"}},
+      "notes": "TEMPLATE DESENVOLVIDO POR CARLOS BRATZ\nlinkedin.com/in/carlosjosebratz"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [2320, 1312],
+      "id": "d77b4be3-0ad8-4605-969f-b8c1878b7bff",
+      "name": "No Operation, do nothing",
+      "notes": "TEMPLATE DESENVOLVIDO POR CARLOS BRATZ\nlinkedin.com/in/carlosjosebratz"
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "key": "={{ $('Dados Lead').item.json.Telefone }}_buffer"
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [2320, 1072],
+      "id": "6877875b-1edc-42ba-bd42-803ed9d45d6e",
+      "name": "Redis1",
+      "credentials": {"redis": {"id": "YOUR_REDIS_CREDENTIAL_ID", "name": "redis_account"}},
+      "notes": "TEMPLATE DESENVOLVIDO POR CARLOS BRATZ\nlinkedin.com/in/carlosjosebratz"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {"id": "db72e40b-2ba6-4979-8648-710fd0e859a6", "name": "Texto", "value": "={{ $('Gatilho').item.json.body.data.message.conversation }}", "type": "string"}
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [640, 688],
+      "id": "7c40ce64-c4d2-473d-beac-d9ea2035532c",
+      "name": "Mensagem Texto1",
+      "notes": "TEMPLATE DESENVOLVIDO POR CARLOS BRATZ\nlinkedin.com/in/carlosjosebratz"
+    },
+    {
+      "parameters": {
+        "operation": "push",
+        "list": "={{ $('Dados Lead').item.json.Telefone }}_buffer",
+        "messageData": "={{ $json.Texto }}",
+        "tail": true
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [1280, 848],
+      "id": "0e555073-5caf-4596-824e-12ffa9cbf6a9",
+      "name": "Redis Buffer Texto",
+      "credentials": {"redis": {"id": "YOUR_REDIS_CREDENTIAL_ID", "name": "redis_account"}},
+      "notes": "TEMPLATE DESENVOLVIDO POR CARLOS BRATZ\nlinkedin.com/in/carlosjosebratz"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {"id": "27ccd1e7-41fa-4940-83d9-e740c8375795", "name": "=Texto", "value": "={{ $('Gatilho').item.json.body.data.message.reactionMessage.text }}", "type": "string"},
+            {"id": "cce135d7-e1db-42f6-97c3-fb60e911d4dc", "name": "", "value": "", "type": "string"}
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [640, 848],
+      "id": "628c0f2d-27ca-4b3f-8c33-c716ef87542d",
+      "name": "Mensagem Texto2",
+      "notes": "TEMPLATE DESENVOLVIDO POR CARLOS BRATZ\nlinkedin.com/in/carlosjosebratz"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {"id": "ae3ac306-ac54-4266-a065-de3ab7c66527", "name": "Erro", "value": "<ErroFormatoMensagem>", "type": "string"}
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [640, 1552],
+      "id": "21caafb7-5c20-492c-a090-1e5e3e0a7c8e",
+      "name": "Mensagem Erro",
+      "notes": "TEMPLATE DESENVOLVIDO POR CARLOS BRATZ\nlinkedin.com/in/carlosjosebratz"
+    },
+    {
+      "parameters": {
+        "operation": "push",
+        "list": "={{ $('Dados Lead').item.json.Telefone }}_buffer",
+        "messageData": "={{ $json.Erro }}",
+        "tail": true
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [1280, 1552],
+      "id": "8c5c2eed-2ce5-4c83-9667-a520018bcbb1",
+      "name": "Redis Buffer Erro",
+      "credentials": {"redis": {"id": "YOUR_REDIS_CREDENTIAL_ID", "name": "redis_account"}},
+      "notes": "TEMPLATE DESENVOLVIDO POR CARLOS BRATZ\nlinkedin.com/in/carlosjosebratz"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {"id": "285f395c-bc9f-40cb-bc2c-16ad784ba962", "name": "Audio", "value": "={{ $json.base64 }}", "type": "string"}
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [800, 992],
+      "id": "d0c47f13-ae42-4fc9-ab45-8d8eaa38bb93",
+      "name": "Mensagem Audio",
+      "notes": "TEMPLATE DESENVOLVIDO POR CARLOS BRATZ\nlinkedin.com/in/carlosjosebratz"
+    },
+    {
+      "parameters": {
+        "operation": "push",
+        "list": "={{ $('Dados Lead').item.json.Telefone }}_buffer",
+        "messageData": "={{ $json.text }}",
+        "tail": true
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [1488, 1008],
+      "id": "539c6f6d-1b52-4582-961b-597b635ce059",
+      "name": "Redis Buffer Audio",
+      "credentials": {"redis": {"id": "YOUR_REDIS_CREDENTIAL_ID", "name": "redis_account"}},
+      "notes": "TEMPLATE DESENVOLVIDO POR CARLOS BRATZ\nlinkedin.com/in/carlosjosebratz"
+    },
+    {
+      "parameters": {
+        "operation": "toBinary",
+        "sourceProperty": "Audio",
+        "options": {"mimeType": "audio/mp4"}
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [1088, 1008],
+      "id": "38ab8d2d-1d6b-406b-b685-0be9ef762384",
+      "name": "Converso de Audio",
+      "notes": "TEMPLATE DESENVOLVIDO POR CARLOS BRATZ\nlinkedin.com/in/carlosjosebratz"
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "operation": "transcribe",
+        "options": {"language": "pt"}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [1280, 1008],
+      "id": "95897340-c614-4b0a-96eb-0ca840d86868",
+      "name": "Transcrever Audio",
+      "credentials": {"openAiApi": {"id": "YOUR_OPENAI_CREDENTIAL_ID", "name": "openai_account"}},
+      "notes": "TEMPLATE DESENVOLVIDO POR CARLOS BRATZ\nlinkedin.com/in/carlosjosebratz"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {"id": "70c8d8b9-a67f-46ae-af34-bee384c2cb5a", "name": "Imagem", "value": "={{ $json.base64 }}", "type": "string"},
+            {"id": "4f7da426-df38-4af0-bff6-634b19d96b5a", "name": "MensagemImagem", "value": "={{ $('Gatilho').first().json.body?.data?.message?.imageMessage?.caption || 'O usuário enviou apenas a imagem, sem nenhum texto.' }}", "type": "string"}
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [880, 1136],
+      "id": "38019843-a609-47f8-95b2-588a3aff2bbd",
+      "name": "Mensagem Imagem",
+      "notes": "TEMPLATE DESENVOLVIDO POR CARLOS BRATZ\nlinkedin.com/in/carlosjosebratz"
+    },
+    {
+      "parameters": {
+        "operation": "toBinary",
+        "sourceProperty": "Imagem",
+        "options": {"mimeType": "image/png"}
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [1088, 1200],
+      "id": "4de83ef3-566d-40ef-9907-69f9e9781467",
+      "name": "Converso Imagem",
+      "notes": "TEMPLATE DESENVOLVIDO POR CARLOS BRATZ\nlinkedin.com/in/carlosjosebratz"
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "operation": "analyze",
+        "modelId": {"__rl": true, "value": "gpt-4o-mini", "mode": "list", "cachedResultName": "GPT-4O-MINI"},
+        "text": "=#Instruções\nO usuário te enviou uma imagem a qual você deve descrever.\n\nA imagem pode vir acompanhada de uma mensagem de texto (<MensagemUsuario>)\n\nCaso venha, utilize a mensagem anexa como contexto extra, tente capturar o sentimento da mensagem e objetivo pelo qual o usuário esteja enviando esta imagem na conversa.\n\nCrie uma resposta descrevendo as informações enviadas para que estas sejam utilizadas por um agente no futuro.\n\nLembre-se:\nEste agente apenas terá as informações que você fornecer, portanto repasse toda informação que julgar importante.\n\n#Dados\n<MensagemUsuario>\n{{ $('Mensagem Imagem').item.json.MensagemImagem }}\n</MensagemUsuario>",
+        "inputType": "base64",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [1280, 1200],
+      "id": "5c7df43f-7b0b-4a01-8680-e15c297063dd",
+      "name": "Analisar Imagem",
+      "credentials": {"openAiApi": {"id": "YOUR_OPENAI_CREDENTIAL_ID", "name": "openai_account"}},
+      "notes": "TEMPLATE DESENVOLVIDO POR CARLOS BRATZ\nlinkedin.com/in/carlosjosebratz"
+    },
+    {
+      "parameters": {
+        "operation": "push",
+        "list": "={{ $('Dados Lead').item.json.Telefone }}_buffer",
+        "messageData": "={{ $json.content }}",
+        "tail": true
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [1488, 1200],
+      "id": "4e75fd5c-e5ca-4781-b9ca-83dec6b5b83d",
+      "name": "Redis Buffer Imagem",
+      "credentials": {"redis": {"id": "YOUR_REDIS_CREDENTIAL_ID", "name": "redis_account"}},
+      "notes": "TEMPLATE DESENVOLVIDO POR CARLOS BRATZ\nlinkedin.com/in/carlosjosebratz"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {"id": "cc633d0f-3f31-489a-9cec-3f7b5fd721ca", "name": "Documento", "value": "={{ $('Gatilho').item.json.body.data.message.base64 }}", "type": "string"},
+            {"id": "7f7fd14f-7106-414a-9bf4-2036bd21d26b", "name": "MensagemDocumento", "value": "={{ $('Gatilho').item.json.body.data.message.documentMessage.caption }}", "type": "string"}
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [640, 1376],
+      "id": "7ed4ae9b-08ac-41ff-b71c-66cea8b7e7ac",
+      "name": "Mensagem pdf",
+      "notes": "TEMPLATE DESENVOLVIDO POR CARLOS BRATZ\nlinkedin.com/in/carlosjosebratz"
+    },
+    {
+      "parameters": {
+        "operation": "toBinary",
+        "sourceProperty": "Documento",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [1088, 1376],
+      "id": "07140b08-04b7-41f8-9505-762963c7d6cb",
+      "name": "Converso pdf",
+      "notes": "TEMPLATE DESENVOLVIDO POR CARLOS BRATZ\nlinkedin.com/in/carlosjosebratz"
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [1280, 1376],
+      "id": "aaf3ad3d-6550-454f-b358-d2b16ad56ac9",
+      "name": "Extrator pdf",
+      "notes": "TEMPLATE DESENVOLVIDO POR CARLOS BRATZ\nlinkedin.com/in/carlosjosebratz"
+    },
+    {
+      "parameters": {
+        "operation": "push",
+        "list": "={{ $('Dados Lead').item.json.Telefone }}_buffer",
+        "messageData": "=<ContextoPDF>\n  <TranscricaoPDF>\n{{ $json.text }}\n</TranscricaoPDF>\nContexto Extra: O usuário encaminhou a mensagem a seguir junto ao PDF.\n  <MensagemUsuario>\n{{ $('Mensagem pdf').item.json.MensagemDocumento }}\n  </MensagemUsuario>\n</ContextoPDF>",
+        "tail": true
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [1488, 1376],
+      "id": "81dc8a61-2e77-47bd-a572-c94e6f15f33a",
+      "name": "Redis Buffer pdf",
+      "credentials": {"redis": {"id": "YOUR_REDIS_CREDENTIAL_ID", "name": "redis_account"}},
+      "notes": "TEMPLATE DESENVOLVIDO POR CARLOS BRATZ\nlinkedin.com/in/carlosjosebratz"
+    },
+    {
+      "parameters": {"content": "## Tratamento de Mensagens\nPermitir com que agente entenda texto, áudio, imagem, documentos, etc..", "height": 1340, "width": 1028, "color": 5},
+      "type": "n8n-nodes-base.stickyNote", "typeVersion": 1, "position": [368, 400],
+      "id": "bab9064d-b1e1-4ead-8717-30b33ec6ce00", "name": "Sticky Note8"
+    },
+    {
+      "parameters": {"content": "### Tipos de Mensagens\nDefina no node Switch as condicionais para definir cada tipo de mídia de acordo com seu gatilho de entrada de dados.\n\nEm cada Node Set:\nMapeie os campos de cada\ntipo de mensagem corretamente.\n\nObs: Não altere o nome\ndos campos pré existentes\nnos nodes SET", "height": 1220, "width": 450, "color": 4},
+      "type": "n8n-nodes-base.stickyNote", "typeVersion": 1, "position": [384, 496],
+      "id": "4a6fa3c4-5b33-463c-afde-818ee3309bb9", "name": "Sticky Note19"
+    },
+    {
+      "parameters": {"content": "### Tratamento de Mensagens\nCada canal pode nos enviar as informações de diferentes formas e aqui trataremos elas de acordo.\n", "height": 1060, "width": 350, "color": 4},
+      "type": "n8n-nodes-base.stickyNote", "typeVersion": 1, "position": [1056, 656],
+      "id": "29039841-c5bc-4342-bf7a-3539939477be", "name": "Sticky Note24"
+    },
+    {
+      "parameters": {"content": "## Buffer de Mensagens\nGarantir que agente compreenda todo o contexto das mensagens enviadas pelo usuário antes de formular uma resposta", "height": 1340, "width": 1040, "color": 5},
+      "type": "n8n-nodes-base.stickyNote", "typeVersion": 1, "position": [1456, 400],
+      "id": "3c448645-4249-4c0e-87af-d47c1beb571f", "name": "Sticky Note9"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {"caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 2},
+          "conditions": [
+            {
+              "id": "51b83700-6802-4085-a2de-db6bbca32b62",
+              "leftValue": "={{ $json.mensagens.last() }}",
+              "rightValue": "={{ $('Redis Buffer1').item.json.mensagens.last() }}",
+              "operator": {"type": "string", "operation": "equals", "name": "filter.operator.equals"}
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [2176, 1200],
+      "id": "40be8817-4a99-4ed1-a9e0-e24bc16231b6",
+      "name": "Comparando Lista Mensagens",
+      "notes": "TEMPLATE DESENVOLVIDO POR CARLOS BRATZ\nlinkedin.com/in/carlosjosebratz"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {"caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 2},
+                "conditions": [
+                  {"leftValue": "={{ $('Gatilho').item.json.body.data.messageType }}", "rightValue": "conversation", "operator": {"type": "string", "operation": "equals"}, "id": "e5b3d9bb-654d-4467-9a02-3344127c9a18"}
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Texto1"
+            },
+            {
+              "conditions": {
+                "options": {"caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 2},
+                "conditions": [
+                  {"id": "425c8e9f-2848-4d95-955b-6a3239637639", "leftValue": "={{ $('Gatilho').item.json.body.data.messageType }}", "rightValue": "reactionMessage", "operator": {"type": "string", "operation": "equals", "name": "filter.operator.equals"}}
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Texto2"
+            },
+            {
+              "conditions": {
+                "options": {"caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 2},
+                "conditions": [
+                  {"id": "c5474037-89e0-479b-96a1-a59abfd3cadb", "leftValue": "={{ $('Gatilho').item.json.body.data.messageType }}", "rightValue": "audioMessage", "operator": {"type": "string", "operation": "equals", "name": "filter.operator.equals"}}
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Audio"
+            },
+            {
+              "conditions": {
+                "options": {"caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 2},
+                "conditions": [
+                  {"id": "5c32a19b-9b97-4d83-bb96-4de92c6e188e", "leftValue": "={{ $('Gatilho').item.json.body.data.messageType }}", "rightValue": "imageMessage", "operator": {"type": "string", "operation": "equals", "name": "filter.operator.equals"}}
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Imagem"
+            },
+            {
+              "conditions": {
+                "options": {"caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 2},
+                "conditions": [
+                  {"id": "0128331b-aadf-4567-beb4-ff6c2944bf7f", "leftValue": "={{ $('Gatilho').item.json.body.data.message.documentMessage.mimetype }}", "rightValue": "application/pdf", "operator": {"type": "string", "operation": "equals", "name": "filter.operator.equals"}}
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "pdf"
+            }
+          ]
+        },
+        "options": {"fallbackOutput": "extra", "renameFallbackOutput": "Outro"}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [432, 1056],
+      "id": "66542f9e-872d-4c17-9e5d-588db0952094",
+      "name": "Rotas de Mensagens",
+      "notes": "TEMPLATE DESENVOLVIDO POR CARLOS BRATZ\nlinkedin.com/in/carlosjosebratz"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {"id": "c182d6a3-8709-4b13-9740-20f1bbda7fcd", "name": "mensagens", "value": "={{ $json.mensagens.join('\\n\\n') }}", "type": "string"}
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [2592, 1072],
+      "id": "b3a01d9e-69f4-413c-9cb9-2b1ff06236e6",
+      "name": "Mensagem",
+      "notes": "TEMPLATE DESENVOLVIDO POR CARLOS BRATZ\nlinkedin.com/in/carlosjosebratz"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=<mensagem_do_usuario>\n{{ $json.output }}\n</mensagem_do_usuario>",
+        "hasOutputParser": true,
+        "messages": {
+          "messageValues": [
+            {"message": "=Apenas estruture a <mensagem_do_usuario> no formato JSON solicitado no output parser e seguindo as instruções de formatação abaixo. Não altere nada mais na mensagem\n\n# Formatação\n- Divida as mensagens para que fiquem naturais e humanizadas;\n- Divida as mensagens conforme estrutura do output parser para que não fiquem muito longas (maiores que 240 caractéres);\n- Não separe mensagens vazias;\n- Use quebras de linhas (\\n\\n) após pontos finais;\n- Para negrito (bold) use apenas um '' nunca duas '' (exemplo: *negrito).\n\nExemplo de formato JSON:\n{\n\"mensagens\": [\"Mensagem 0\", \"Mensagem 1\", \"Mensagem 2\"]\n}"}
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [4416, 1008],
+      "id": "da3b7952-aa50-4996-a017-a604700057ce",
+      "name": "Basic LLM Chain",
+      "notes": "TEMPLATE DESENVOLVIDO POR CARLOS BRATZ\nlinkedin.com/in/carlosjosebratz"
+    },
+    {
+      "parameters": {"options": {}},
+      "type": "@n8n/n8n-nodes-langchain.outputParserAutofixing",
+      "typeVersion": 1,
+      "position": [4608, 1168],
+      "id": "363cd56a-3716-4418-9dda-d64bca836a52",
+      "name": "Auto-fixing Output Parser",
+      "notes": "TEMPLATE DESENVOLVIDO POR CARLOS BRATZ\nlinkedin.com/in/carlosjosebratz"
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"mensagens\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"string\"\n      }\n    }\n  },\n  \"required\": [\"mensagens\"]\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [4528, 1280],
+      "id": "a77f710b-df25-4e8e-a9ee-8c20ed3d1409",
+      "name": "Structured Output Parser",
+      "notes": "TEMPLATE DESENVOLVIDO POR CARLOS BRATZ\nlinkedin.com/in/carlosjosebratz"
+    },
+    {
+      "parameters": {
+        "model": {"__rl": true, "mode": "list", "value": "gpt-4.1-mini"},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [4368, 1280],
+      "id": "283db44c-617a-4461-b85a-0fbddb892f93",
+      "name": "OpenAI Chat Model1",
+      "credentials": {"openAiApi": {"id": "YOUR_OPENAI_CREDENTIAL_ID", "name": "openai_account"}},
+      "notes": "TEMPLATE DESENVOLVIDO POR CARLOS BRATZ\nlinkedin.com/in/carlosjosebratz"
+    },
+    {
+      "parameters": {"fieldToSplitOut": "output.mensagens", "options": {}},
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [4800, 976],
+      "id": "96be819a-776f-4467-a742-d7fe612c398e",
+      "name": "Split Out",
+      "notes": "TEMPLATE DESENVOLVIDO POR CARLOS BRATZ\nlinkedin.com/in/carlosjosebratz"
+    },
+    {
+      "parameters": {"batchSize": "=1", "options": {}},
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [4992, 1072],
+      "id": "0a384a4a-f04c-471d-aebe-f8a2f77d0cdc",
+      "name": "Loop Over Items",
+      "notes": "TEMPLATE DESENVOLVIDO POR CARLOS BRATZ\nlinkedin.com/in/carlosjosebratz"
+    },
+    {
+      "parameters": {"amount": 2},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [5408, 1168],
+      "id": "3f626cd0-cd16-42eb-99dc-34fa454c906d",
+      "name": "Wait1",
+      "webhookId": "YOUR_WAIT_WEBHOOK_ID_2",
+      "notes": "TEMPLATE DESENVOLVIDO POR CARLOS BRATZ\nlinkedin.com/in/carlosjosebratz"
+    },
+    {
+      "parameters": {"content": "## Envio das Respostas ao Usuário\nEnvio das mensagens quebradas para o usuário", "height": 540, "width": 640, "color": 5},
+      "type": "n8n-nodes-base.stickyNote", "typeVersion": 1, "position": [4928, 848],
+      "id": "2c87a3a2-1825-457d-8b96-f0530a214261", "name": "Sticky Note13"
+    },
+    {
+      "parameters": {"content": "## Humanizar Resposta\nQuebra de mensagens em mensagens menores e com contexto.", "height": 540, "width": 580, "color": 5},
+      "type": "n8n-nodes-base.stickyNote", "typeVersion": 1, "position": [4336, 848],
+      "id": "88a614da-08b9-4818-aad2-d841eecbeb1a", "name": "Sticky Note14"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Essa tool desativa o seu atendimento e passa a conversa para o atendente humano. Após a desativação, você não poderá mais falar com o atentende.\n\nApenas fale sobre a possibilidade de um atendimento humano caso seja explicitamente requisitado esse tipo de atendimento, ou caso o clima da conversa com o usuário ficar muito negativo.\n\nAntes de desativar, reforce para o cliente sobre quais assuntos você pode ajuda-lo e confirme se mesmo assim ele deseja seguir com atendimento humano.\n\nSempre solicite uma dupla confirmação do usuário antes de desativar o seu atendimento.\n\n# Resposta após desativação:\nResponda ao usuário que a conversa foi encaminhada para um atendente especializado que logo irá entrar em contato e dará seguimento ao atendimento.",
+        "operation": "set",
+        "key": "={{ $('Dados Lead').item.json.Telefone }}_status",
+        "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Value', `Definir como \"Ativo\" ou \"Desativado\"`, 'string') }}",
+        "expire": true,
+        "ttl": "={{ $('Parametros do Fluxo').item.json.TempoInatividade }}"
+      },
+      "type": "n8n-nodes-base.redisTool",
+      "typeVersion": 1,
+      "position": [4176, 1248],
+      "id": "1f91c26c-f030-45f7-a46d-1072d7be6b48",
+      "name": "Desativar Agente",
+      "credentials": {"redis": {"id": "YOUR_REDIS_CREDENTIAL_ID", "name": "redis_account"}},
+      "notes": "TEMPLATE DESENVOLVIDO POR CARLOS BRATZ\nlinkedin.com/in/carlosjosebratz"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {"id": "352b1b4c-6ab7-4715-87c1-a77027670efc", "name": "EsperaBuffer", "value": 60, "type": "number"},
+            {"id": "6092b729-7772-4db8-833a-896338a5c60b", "name": "TempoInatividade", "value": 3600, "type": "number"},
+            {"id": "d3def16d-f0af-40fa-94df-af336d340349", "name": "ModeloTemperatura", "value": 0.4, "type": "number"}
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [-976, 1088],
+      "id": "1a71dafe-6407-43f1-8316-48eb8cb0e7dc",
+      "name": "Parametros do Fluxo",
+      "notes": "TEMPLATE DESENVOLVIDO POR CARLOS BRATZ\nlinkedin.com/in/carlosjosebratz"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "propertyName": "AgentesStatus",
+        "key": "={{ $json.Telefone }}_status",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [-192, 1088],
+      "id": "b2f90014-d0b7-46ea-80f4-12ff71e2e591",
+      "name": "Redis",
+      "credentials": {"redis": {"id": "YOUR_REDIS_CREDENTIAL_ID", "name": "redis_account"}},
+      "notes": "TEMPLATE DESENVOLVIDO POR CARLOS BRATZ\nlinkedin.com/in/carlosjosebratz"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {"caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 2},
+          "conditions": [
+            {"id": "6273559a-d1aa-466e-a4e0-40ba5dad4ce9", "leftValue": "={{ $json.AgentesStatus }}", "rightValue": "Desativado", "operator": {"type": "string", "operation": "equals", "name": "filter.operator.equals"}}
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [-32, 1088],
+      "id": "1646cbd3-50ec-48fa-b942-a0da42b56000",
+      "name": "Bot Desativado?!",
+      "notes": "TEMPLATE DESENVOLVIDO POR CARLOS BRATZ\nlinkedin.com/in/carlosjosebratz"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [160, 992],
+      "id": "265085f2-4ef7-49ae-948f-1836274d95a2",
+      "name": "No Operation, do nothing1",
+      "notes": "TEMPLATE DESENVOLVIDO POR CARLOS BRATZ\nlinkedin.com/in/carlosjosebratz"
+    },
+    {
+      "parameters": {"content": "## Gestão de Fluxo Agente Desativado (Humano em Atendimento)\nGestão do fluxo para atendimento humano.\n", "height": 440, "width": 580, "color": 5},
+      "type": "n8n-nodes-base.stickyNote", "typeVersion": 1, "position": [-240, 880],
+      "id": "aef6ee85-0fd1-4735-a2b1-65feca8b8a97", "name": "Sticky Note6"
+    },
+    {
+      "parameters": {"content": "## Variáveis do Fluxo\nCentral de controle do workflow", "height": 440, "color": 5},
+      "type": "n8n-nodes-base.stickyNote", "typeVersion": 1, "position": [-1040, 880],
+      "id": "0d906802-a5b5-4691-a422-77d8f75aae25", "name": "Sticky Note12"
+    },
+    {
+      "parameters": {"content": "Ajuste tempos de buffer e inatividade do agente conforme necessidade.\n", "height": 280, "width": 190, "color": 3},
+      "type": "n8n-nodes-base.stickyNote", "typeVersion": 1, "position": [-1008, 976],
+      "id": "02fd3012-a22b-4db8-8944-0f2aa3d05f8d", "name": "Sticky Note18"
+    },
+    {
+      "parameters": {"content": "![Source example](https://raw.githubusercontent.com/EvolutionAPI/evolution-api/main/public/images/cover.png)\n", "height": 120, "width": 220, "color": 7},
+      "type": "n8n-nodes-base.stickyNote", "typeVersion": 1, "position": [-1088, 96],
+      "id": "c006ae7b-019b-4de0-bd24-1f8e0de736f2", "name": "Sticky Note26"
+    },
+    {
+      "parameters": {"content": "![Source example](https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/WhatsApp.svg/800px-WhatsApp.svg.png)\n", "width": 160, "color": 7},
+      "type": "n8n-nodes-base.stickyNote", "typeVersion": 1, "position": [-1280, 48],
+      "id": "fcda6888-29d8-43fa-992c-2fb02d050c70", "name": "Sticky Note27"
+    },
+    {
+      "parameters": {"content": "Ajuste sua instância e autenficiação da Evolution", "height": 240, "width": 230, "color": 3},
+      "type": "n8n-nodes-base.stickyNote", "typeVersion": 1, "position": [5152, 1120],
+      "id": "5b5a624b-64ac-433a-b4d8-4fdd23289573", "name": "Sticky Note22"
+    },
+    {
+      "parameters": {"content": "", "height": 1580, "width": 6700, "color": 7},
+      "type": "n8n-nodes-base.stickyNote", "typeVersion": 1, "position": [-304, 208],
+      "id": "c77b8166-5fca-479c-b3ec-a0fd6b6237b7", "name": "Sticky Note20"
+    },
+    {
+      "parameters": {"content": "-\n# MASTER AGENT\n-", "height": 140, "width": 304, "color": 5},
+      "type": "n8n-nodes-base.stickyNote", "typeVersion": 1, "position": [1280, 80],
+      "id": "54b47f31-f62b-4859-a485-3a3db4c7c6af", "name": "Sticky Note23"
+    },
+    {
+      "parameters": {"content": "## Instruções de Uso\n🔴 Áreas em vermelho você deve realizar alterações de acordo com seu canal de entrada;\n🟢 Áreas em verde já estão pré configuradas para o canal do Template, caso vá utilizar outro canal, também fazer devidas alterações nesses nodes;\n\n⚠️ Atenção: \n1. Não altere nome de parâmetros pré-existentes para para evitar quebra do fluxo;\n2. Fique a vontade para adicionar novos parâmetros caso necessário;", "height": 220, "width": 690, "color": 3},
+      "type": "n8n-nodes-base.stickyNote", "typeVersion": 1, "position": [-1248, 272],
+      "id": "c3fab4d1-7db0-4781-9316-cee0fb813e60", "name": "Sticky Note25"
+    },
+    {
+      "parameters": {"content": "TEMPLATE DESENVOLVIDO POR CARLOS BRATZ\nlinkedin.com/in/carlosjosebratz", "height": 170, "width": 413, "color": 4},
+      "id": "daaefab3-a20c-4230-bbdc-de5b8d5c3cc5", "name": "Sticky Note29",
+      "type": "n8n-nodes-base.stickyNote", "typeVersion": 1, "position": [-848, 32]
+    },
+    {
+      "parameters": {"content": "## Formatos Base64\nBase64 é uma forma de codificar dados binários como texto. Dependendo do tipo de arquivo, os prefixos variam para indicar o formato do dado. Aqui estão alguns dos formatos mais comuns com os respectivos prefixos base64:\n\n### 1. **Imagem**\n   - **PNG**: `data:image/png;base64,`\n   - **JPEG**: `data:image/jpeg;base64,`\n   - **GIF**: `data:image/gif;base64,`\n   - **SVG**: `data:image/svg+xml;base64,`\n   - **BMP**: `data:image/bmp;base64,`\n   \n### 2. **Áudio**\n   - **MP3**: `data:audio/mp3;base64,`\n   - **WAV**: `data:audio/wav;base64,`\n   - **OGG**: `data:audio/ogg;base64,`\n   - **MPEG**: `data:audio/mpeg;base64,`\n\n### 3. **Vídeo**\n   - **MP4**: `data:video/mp4;base64,`\n   - **OGG**: `data:video/ogg;base64,`\n   - **WebM**: `data:video/webm;base64,`\n\n### 4. **Texto**\n   - **Plain Text**: `data:text/plain;base64,`\n   - **HTML**: `data:text/html;base64,`\n   - **CSS**: `data:text/css;base64,`\n   - **JavaScript**: `data:text/javascript;base64,`\n   - **CSV**: `data:text/csv;base64,`\n\n### 5. **Documentos**\n   - **PDF**: `data:application/pdf;base64,`\n   - **JSON**: `data:application/json;base64,`\n   - **ZIP**: `data:application/zip;base64,`\n   - **XML**: `data:application/xml;base64,`\n\nEsses são exemplos de prefixos que podem ser usados ao incluir dados base64 em documentos ou aplicações.", "height": 1166, "width": 593, "color": 7},
+      "id": "e613cea5-eae3-415b-911e-3e9ad571a9fa", "name": "Sticky Note45",
+      "type": "n8n-nodes-base.stickyNote", "typeVersion": 1, "position": [-448, 3024]
+    },
+    {
+      "parameters": {"content": "## MimeTypes\nO Mime type é o mecanismo para especificar o tipo de documento.\nA estrutura de um MIME type é muito simples; Consiste de um tipo e um subtipo, separados por um '/', onde nenhum espaço é permitido. \nO tipo representa a categoria. \nO subtipo é específico para cada tipo.\n\n### 1. **image**\nRepresenta qualquer tipo de imagens\n- image/gif\n- image/png\n- image/jpeg\n- image/bmp\n- image/webp\n   \n\n### 2. **audio**\nRepresenta qualquer tipo de arquivo de audio\n- audio/midi\n- audio/mpeg\n- audio/webm\n- audio/ogg\n- audio/wav\n- audio/mp3\n- audio/mp4\n\n### 3. **video**\nRepresenta qualquer tipo de arquivo de video\n- video/webm\n- video/ogg\n- video/mp4\n\n### 4. **text**\nRepresenta qualquer documento que contenha texto\n- text/plain\n- text/csv\n- text/html\n- text/css\n- text/javascript\n\n### 5. **application**\nRepresenta qualquer tipo de dados binários.\n- application/octet-stream\n- application/pkcs12\n- application/vnd.mspowerpoint\n- application/xhtml+xml\n- application/xml\n- application/pdf", "height": 1166, "width": 593, "color": 7},
+      "id": "f486cf22-a007-4cac-893c-a3af33372776", "name": "Sticky Note46",
+      "type": "n8n-nodes-base.stickyNote", "typeVersion": 1, "position": [-1104, 3024]
+    },
+    {
+      "parameters": {"content": "![Source example](https://raw.githubusercontent.com/EvolutionAPI/evolution-api/main/public/images/cover.png)\n", "height": 120, "width": 220, "color": 7},
+      "type": "n8n-nodes-base.stickyNote", "typeVersion": 1, "position": [-912, 1264],
+      "id": "4248a49c-f557-4531-beac-3112f34ecb12", "name": "Sticky Note47"
+    },
+    {
+      "parameters": {"content": "![Source example](https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/WhatsApp.svg/800px-WhatsApp.svg.png)\n", "width": 160, "color": 7},
+      "type": "n8n-nodes-base.stickyNote", "typeVersion": 1, "position": [-1104, 1216],
+      "id": "348bb574-ca08-4f17-86d8-4b79142216fb", "name": "Sticky Note48"
+    },
+    {
+      "parameters": {"content": "-\n# MASTER AGENT\n-", "height": 140, "width": 304, "color": 5},
+      "type": "n8n-nodes-base.stickyNote", "typeVersion": 1, "position": [1680, 1248],
+      "id": "d5931d17-3bda-4833-ab53-f6f907a0eb2e", "name": "Sticky Note51"
+    },
+    {
+      "parameters": {"content": "## Instruções de Uso\n🔴 Áreas em vermelho você deve realizar alterações de acordo com seu canal de entrada;\n🟢 Áreas em verde já estão pré configuradas para o canal do Template, caso vá utilizar outro canal, também fazer devidas alterações nesses nodes;\n\n⚠️ Atenção: \n1. Não altere nome de parâmetros pré-existentes para para evitar quebra do fluxo;\n2. Fique a vontade para adicionar novos parâmetros caso necessário;", "height": 220, "width": 690, "color": 3},
+      "type": "n8n-nodes-base.stickyNote", "typeVersion": 1, "position": [-1072, 1440],
+      "id": "fbcf3296-95f4-4e9d-9d46-e844367473ae", "name": "Sticky Note52"
+    },
+    {
+      "parameters": {"content": "TEMPLATE DESENVOLVIDO POR CARLOS BRATZ\nlinkedin.com/in/carlosjosebratz", "height": 170, "width": 413, "color": 4},
+      "id": "87276d1b-8854-4ce2-9fe2-27b7973cff51", "name": "Sticky Note53",
+      "type": "n8n-nodes-base.stickyNote", "typeVersion": 1, "position": [-656, 1200]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://{{SEU-DOMINIO-EVOLUTION}}/message/sendText/{{SUA-INSTANCIA-EVOLUTION}}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {"name": "number", "value": "={{ $('Dados Lead').item.json.Telefone }}"},
+            {"name": "text", "value": "={{ $json['output.mensagens'] }}"}
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [5200, 1216],
+      "id": "4424f364-f7a9-4cad-91d2-aa06c44ca4b2",
+      "name": "Enviar Mensagem2",
+      "credentials": {"httpHeaderAuth": {"id": "YOUR_EVOLUTION_CREDENTIAL_ID", "name": "evolution_api"}},
+      "notes": "TEMPLATE DESENVOLVIDO POR CARLOS BRATZ\nlinkedin.com/in/carlosjosebratz"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Gatilho').first().json.body.server_url }}/chat/getBase64FromMediaMessage/{{ $('Gatilho').first().json.body.instance }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {"name": "apikey", "value": "={{ $('Gatilho').first().json.body.apikey }}"}
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { \"message\": $('Gatilho').first().json.body.data } }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [672, 1200],
+      "id": "0ca78e0f-789b-4653-ae85-3c2379d9c7cc",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Gatilho').first().json.body.server_url }}/chat/getBase64FromMediaMessage/{{ $('Gatilho').first().json.body.instance }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {"name": "apikey", "value": "={{ $('Gatilho').first().json.body.apikey }}"}
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { \"message\": $('Gatilho').first().json.body.data } }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [656, 1040],
+      "id": "f96383f9-0688-41e6-bd8f-bf8b386cbb61",
+      "name": "HTTP Request1"
+    }
+  ],
+  "connections": {
+    "Gatilho": {"main": [[{"node": "Parametros do Fluxo", "type": "main", "index": 0}]]},
+    "Filtro de Bloqueio": {"main": [[{"node": "Dados Lead", "type": "main", "index": 0}]]},
+    "Dados Lead": {"main": [[{"node": "Redis", "type": "main", "index": 0}]]},
+    "Encontrar Cliente": {"main": [[{"node": "Cliente existe?", "type": "main", "index": 0}]]},
+    "Cliente existe?": {"main": [[{"node": "Merge", "type": "main", "index": 0}], [{"node": "Criar Cliente", "type": "main", "index": 0}]]},
+    "Criar Cliente": {"main": [[{"node": "Merge", "type": "main", "index": 1}]]},
+    "Merge": {"main": [[{"node": "Agente IA", "type": "main", "index": 0}]]},
+    "OpenAI Chat Model": {"ai_languageModel": [[{"node": "Agente IA", "type": "ai_languageModel", "index": 0}]]},
+    "Agente IA": {"main": [[{"node": "Basic LLM Chain", "type": "main", "index": 0}]]},
+    "Calculadora": {"ai_tool": [[{"node": "Agente IA", "type": "ai_tool", "index": 0}]]},
+    "Postgres Chat Memory": {"ai_memory": [[{"node": "Agente IA", "type": "ai_memory", "index": 0}]]},
+    "Wait": {"main": [[{"node": "Redis Buffer2", "type": "main", "index": 0}]]},
+    "Redis Buffer1": {"main": [[{"node": "Wait", "type": "main", "index": 0}]]},
+    "Redis Buffer2": {"main": [[{"node": "Comparando Lista Mensagens", "type": "main", "index": 0}]]},
+    "Redis1": {"main": [[{"node": "Mensagem", "type": "main", "index": 0}]]},
+    "Mensagem Texto1": {"main": [[{"node": "Redis Buffer Texto", "type": "main", "index": 0}]]},
+    "Redis Buffer Texto": {"main": [[{"node": "Redis Buffer1", "type": "main", "index": 0}]]},
+    "Mensagem Texto2": {"main": [[{"node": "Redis Buffer Texto", "type": "main", "index": 0}]]},
+    "Mensagem Erro": {"main": [[{"node": "Redis Buffer Erro", "type": "main", "index": 0}]]},
+    "Redis Buffer Erro": {"main": [[{"node": "Redis Buffer1", "type": "main", "index": 0}]]},
+    "Mensagem Audio": {"main": [[{"node": "Converso de Audio", "type": "main", "index": 0}]]},
+    "Redis Buffer Audio": {"main": [[{"node": "Redis Buffer1", "type": "main", "index": 0}]]},
+    "Converso de Audio": {"main": [[{"node": "Transcrever Audio", "type": "main", "index": 0}]]},
+    "Transcrever Audio": {"main": [[{"node": "Redis Buffer Audio", "type": "main", "index": 0}]]},
+    "Mensagem Imagem": {"main": [[{"node": "Converso Imagem", "type": "main", "index": 0}]]},
+    "Converso Imagem": {"main": [[{"node": "Analisar Imagem", "type": "main", "index": 0}]]},
+    "Analisar Imagem": {"main": [[{"node": "Redis Buffer Imagem", "type": "main", "index": 0}]]},
+    "Redis Buffer Imagem": {"main": [[{"node": "Redis Buffer1", "type": "main", "index": 0}]]},
+    "Mensagem pdf": {"main": [[{"node": "Converso pdf", "type": "main", "index": 0}]]},
+    "Converso pdf": {"main": [[{"node": "Extrator pdf", "type": "main", "index": 0}]]},
+    "Extrator pdf": {"main": [[{"node": "Redis Buffer pdf", "type": "main", "index": 0}]]},
+    "Redis Buffer pdf": {"main": [[{"node": "Redis Buffer1", "type": "main", "index": 0}]]},
+    "Comparando Lista Mensagens": {"main": [[{"node": "Redis1", "type": "main", "index": 0}], [{"node": "No Operation, do nothing", "type": "main", "index": 0}]]},
+    "Rotas de Mensagens": {"main": [[{"node": "Mensagem Texto1", "type": "main", "index": 0}], [{"node": "Mensagem Texto2", "type": "main", "index": 0}], [{"node": "HTTP Request1", "type": "main", "index": 0}], [{"node": "HTTP Request", "type": "main", "index": 0}], [{"node": "Mensagem pdf", "type": "main", "index": 0}], [{"node": "Mensagem Erro", "type": "main", "index": 0}]]},
+    "Mensagem": {"main": [[{"node": "Encontrar Cliente", "type": "main", "index": 0}]]},
+    "Basic LLM Chain": {"main": [[{"node": "Split Out", "type": "main", "index": 0}]]},
+    "Auto-fixing Output Parser": {"ai_outputParser": [[{"node": "Basic LLM Chain", "type": "ai_outputParser", "index": 0}]]},
+    "Structured Output Parser": {"ai_outputParser": [[{"node": "Auto-fixing Output Parser", "type": "ai_outputParser", "index": 0}]]},
+    "OpenAI Chat Model1": {"ai_languageModel": [[{"node": "Auto-fixing Output Parser", "type": "ai_languageModel", "index": 0}, {"node": "Basic LLM Chain", "type": "ai_languageModel", "index": 0}]]},
+    "Split Out": {"main": [[{"node": "Loop Over Items", "type": "main", "index": 0}]]},
+    "Loop Over Items": {"main": [[{"node": "Fim", "type": "main", "index": 0}], [{"node": "Enviar Mensagem2", "type": "main", "index": 0}]]},
+    "Wait1": {"main": [[{"node": "Loop Over Items", "type": "main", "index": 0}]]},
+    "Desativar Agente": {"ai_tool": [[{"node": "Agente IA", "type": "ai_tool", "index": 0}]]},
+    "Parametros do Fluxo": {"main": [[{"node": "Filtro de Bloqueio", "type": "main", "index": 0}]]},
+    "Redis": {"main": [[{"node": "Bot Desativado?!", "type": "main", "index": 0}]]},
+    "Bot Desativado?!": {"main": [[{"node": "No Operation, do nothing1", "type": "main", "index": 0}], [{"node": "Rotas de Mensagens", "type": "main", "index": 0}]]},
+    "Enviar Mensagem2": {"main": [[{"node": "Wait1", "type": "main", "index": 0}]]},
+    "HTTP Request": {"main": [[{"node": "Mensagem Imagem", "type": "main", "index": 0}]]},
+    "HTTP Request1": {"main": [[{"node": "Mensagem Audio", "type": "main", "index": 0}]]}
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "instanceId": "YOUR_INSTANCE_ID"
+  }
+}
